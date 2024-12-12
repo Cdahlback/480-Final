@@ -54,11 +54,6 @@ def upload():
         return jsonify({"error": e.response['Error']['Message']}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-    # View all of the files you have uploaded
-    files = s3.list_objects(Bucket=bucketname)
-    for file in files['Contents']:
-        print(obj.bucket_name, obj.object_name, obj.last_modified, obj.etag, obj.size, obj.content_type)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
