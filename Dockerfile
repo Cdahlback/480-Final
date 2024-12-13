@@ -22,6 +22,14 @@ CMD ["server", "/data"]
 # Minio listens on port 9000.
 EXPOSE 9000
 
+# Run the traefik file
+
+FROM traefik:v2.9
+
+CMD ["--api.insecure=true", "--providers.docker=true", "--entrypoints.web.address=:80"]
+
+EXPOSE 80
+
 # Run the upload microservice
 FROM base AS upload_service
 
