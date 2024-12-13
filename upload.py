@@ -1,20 +1,22 @@
 from flask import Flask, request, jsonify, send_file
 import boto3
 from botocore.exceptions import NoCredentialsError, ClientError
+import os
 
 app = Flask(__name__)
 
-# Allow the user to enter URL, bucket name, access key, and secret key
-bucketname = input("Enter the name of the bucket: ")
-access_key = input("Enter your access key: ")
-secret_key = input("Enter your secret key: ")
+# Specify the URL, bucket name, access key, and secret key
+bucketname = os.getenv('BUCKET_NAME', 'upload')
+minio_endpoint = os.getenv('MINIO_ENDPOINT', 'http://minio:9000')
+access_key = os.getenv('MINIO_ACCESS_KEY', 'minioadmin')
+secret_key = os.getenv('MINIO_SECRET_KEY', 'minioadmin')
 
 # Create a client with the MinIO server playground, its access key and secret key.
 s3 = boto3.client(
     's3',
     aws_access_key_id=access_key,
     aws_secret_access_key=secret_key,
-    endpoint_url='http://localhost:9000',
+    endpoint_url=minio_endpoint,
     region_name='us-east-1'
 )
 
@@ -54,6 +56,11 @@ def upload():
         return jsonify({"error": e.response['Error']['Message']}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    # View all of the files you have uploaded
+    files = s3.list_objects(Bucket=bucketname)
+    for file in files['Contents']:
+        print(obj.bucket_name, obj.object_name, obj.last_modified, obj.etag, obj.size, obj.content_type)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
